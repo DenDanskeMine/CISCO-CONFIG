@@ -1,0 +1,228 @@
+
+! Denne config er ikke testet!!!!
+
+interface Gi 0/1.10
+description VLAN 10. fa0/1-12 SW1
+no shutdown 
+ip address 172.16.0.2 255.255.255.192
+encapsulation dot1Q 10
+standby 10 ip 172.16.0.1
+standby 10 preempt 
+standby 10 timers 1 3
+standby 10 priority 110
+standby 10 track Gi 0/0
+standby 10 track fa 0/1/0
+ip nat inside
+no ip redirects
+no ip unreachables
+no ip proxy-arp
+ip verify source
+
+!
+interface Gi 0/1.20
+description VLAN 20. fa0/13-22 SW1
+no shutdown 
+ip address 172.16.0.66 255.255.255.192
+encapsulation dot1Q 20
+standby 20 ip 172.16.0.65
+standby 20 preempt 
+standby 20 timers 1 3
+standby 20 priority 110
+standby 20 track Gi 0/0
+standby 20 track fa 0/1/0
+ip nat inside
+no ip redirects
+no ip unreachables
+no ip proxy-arp
+ip verify source
+
+!
+interface Gi 0/1.30
+description VLAN 30. fa0/1-12 SW2
+no shutdown
+ip address 172.16.0.130 255.255.255.192
+encapsulation dot1Q 30
+standby 30 ip 172.16.0.129
+standby 30 preempt 
+standby 30 timers 1 3
+standby 30 priority 110
+standby 30 track Gi 0/0
+standby 30 track fa 0/1/0
+ip nat inside
+no ip redirects
+no ip unreachables
+no ip proxy-arp
+ip verify source
+
+!
+interface Gi 0/1.40
+description VLAN 40. INTERN-WIFI
+no shutdown
+ip address 172.16.1.2 255.255.255.128
+encapsulation dot1Q 40
+standby 40 ip 172.16.1.1
+standby 40 preempt 
+standby 40 timers 1 3
+standby 40 priority 110
+standby 40 track Gi 0/0
+standby 40 track fa 0/1/0
+ip nat inside
+no ip redirects
+no ip unreachables
+no ip proxy-arp
+ip verify source
+
+!
+interface Gi 0/1.50
+description VLAN 50. EKSTERN-WIFI
+no shutdown
+ip address 172.16.1.130 255.255.255.128
+encapsulation dot1Q 50
+standby 50 ip 172.16.1.129
+standby 50 preempt 
+standby 50 timers 1 3
+standby 50 priority 110
+standby 50 track Gi 0/0
+standby 50 track fa 0/1/0
+ip nat inside
+no ip redirects
+no ip unreachables
+no ip proxy-arp
+ip verify source
+
+!
+interface fa 0/1/0
+description GRE. /28
+ip address 10.10.10.2 255.255.255.240
+no shutdown
+ip nat inside
+no ip redirects
+no ip unreachables
+no ip proxy-arp
+ip verify source
+!
+interface tunnel 0 
+ip address 172.16.1.1 255.255.255.0
+tunnel source 10.10.10.2
+tunnel destination 20.20.20.2
+
+
+
+
+!
+interface gi 0/0
+description ISP (Skolen)
+ip address dhcp
+no shutdown
+ip nat outside
+ ! IPS Forbindelse
+
+ !
+ ip dhcp pool VLAN10
+ network 172.16.0.0 255.255.255.192
+ default-router 172.16.0.1
+ dns-server 8.8.8.8
+  !
+ ip dhcp pool VLAN20
+ network 172.16.0.64 255.255.255.192
+ default-router 172.16.0.65
+ dns-server 8.8.8.8
+ !
+ ip dhcp pool VLAN30
+ network 172.16.0.128 255.255.255.192
+ default-router 172.16.0.129
+ dns-server 8.8.8.8
+!
+ ip dhcp pool VLAN40
+ network 172.16.1.0 255.255.255.128
+ default-router 172.16.1.1
+ dns-server 8.8.8.8
+!
+ ip dhcp pool VLAN50
+ network 172.16.1.128 255.255.255.128
+ default-router 172.16.1.129
+ dns-server 8.8.8.8
+!
+ip dhcp excluded-address 172.16.0.1 172.16.0.15
+ip dhcp excluded-address 172.16.0.65 172.16.0.79
+ip dhcp excluded-address 172.16.0.129 172.16.0.143
+ip dhcp excluded-address 172.16.1.1 172.16.1.15
+ip dhcp excluded-address 172.16.1.128 172.16.1.142
+!
+router ospf 1
+network 172.16.0.0 0.0.0.63 area 0
+network 172.16.0.64 0.0.0.63 area 0
+network 172.16.0.128 0.0.0.63 area 0
+network 10.10.10.0 0.0.0.15 area 0
+network 172.16.1.0 0.0.0.127 area 0
+network 10.0.0.0 0.0.0.3 area 0
+network 10.10.10.0 0.0.0.15 area 0
+network 20.20.20.0 0.0.0.15 area 0
+network 172.16.0.0 0.0.0.63 area 0
+network 172.16.0.64 0.0.0.63 area 0
+network 172.16.0.128 0.0.0.63 area 0
+network 10.10.10.0 0.0.0.15 area 0
+network 172.16.1.0 0.0.0.127 area 0
+! Der mangler nok nogen networks
+ip route 10.10.10.0 255.255.255.240 172.16.1.1
+
+!
+ip nat inside source list 1 interface Gi 0/0 overload
+access-list 1 permit 172.16.0.0 0.15.255.255
+!
+hostname R1
+ip domain-name R1
+!
+line con 0
+  transport input none
+  login local
+  password admin
+!
+line vty 0 15
+  transport input ssh
+  login local
+  password admin
+!
+service password-encryption
+enable secret admin 
+username admin privilege 15 secret admin
+!
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+! LAver rsa keys.
+
+! AAA SERVER 
+
+aaa new-model 
+aaa group server radius Cisco
+ server-private 172.16.0.146 auth-port 1812 acct-port 1813 key Admin
+!
+aaa authentication login default group Cisco local
+aaa authorization console
+aaa authorization exec default group Cisco local if-authenticated
+!
+
+!
+
+
+
+
+
+
+
+
+
+int gi 0/0
+ip add 10.10.10.6 255.255.255.240
+no shutdown
+
+
+int g10/1
+ip add 20.20.20.5 255.255.255.240
+no shutdown
+!
+router ospf 1
+network 10.10.10.0 0.0.0.15 area 0
+network 20.20.20.0 0.0.0.15 area 0
+!
+

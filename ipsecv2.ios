@@ -1,0 +1,35 @@
+crypto isakmp policy 1
+ encr 3des
+ hash md5
+ authentication pre-share
+ group 2
+ lifetime 86400
+ 
+ crypto isakmp key firewallcx address 20.20.20.2
+ crypto ipsec transform-set TS esp-3des esp-md5-hmac
+ mode transport
+ crypto ipsec profile protect-gre
+ set security-association lifetime seconds 86400
+set transform-set TS
+
+interface Tunnel 0
+tunnel protection ipsec profile protect-gre
+
+!!!!!
+ crypto isakmp policy 1
+ encr 3des
+ hash md5
+ authentication pre-share
+ group 2
+ lifetime 86400
+ 
+ crypto isakmp key firewallcx address 10.10.10.2
+ crypto ipsec transform-set TS esp-3des esp-md5-hmac
+mode transport
+
+ crypto ipsec profile protect-gre
+set security-association lifetime seconds 86400
+set transform-set TS
+
+ interface Tunnel 0
+tunnel protection ipsec profile protect-gre

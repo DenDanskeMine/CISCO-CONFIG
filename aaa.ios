@@ -1,0 +1,9 @@
+aaa new-model 
+aaa group server radius Cisco
+ server-private 172.16.0.146 auth-port 1812 acct-port 1813 key Admin
+!
+exit
+aaa authentication login default group Cisco local
+aaa authorization console
+aaa authorization exec default group Cisco local if-authenticated
+!

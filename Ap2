@@ -1,0 +1,17 @@
+interface bvi1
+  ip address 172.16.1.134 255.255.255.128
+  no shutdown
+
+ip default-gateway 172.16.1.129
+
+dot11 ssid Ekstern-Wifi
+  guest-mode
+  authentication open
+  authentication key-management wpa version 2
+  wpa-psk Admin123
+
+interface Dot11Radio1
+  encryption mode ciphers aes-ccm
+  ssid Eastern-Wifi
+  channel least-congested
+  no shutdown
