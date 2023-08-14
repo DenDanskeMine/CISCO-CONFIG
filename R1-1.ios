@@ -1,5 +1,5 @@
 
-! Denne config er ikke testet!!!!
+! konfig til r1-1!!!!
 
 interface Gi 0/1.10
 description VLAN 10. fa0/1-12 SW1
@@ -17,7 +17,6 @@ no ip redirects
 no ip unreachables
 no ip proxy-arp
 ip verify source
-
 !
 interface Gi 0/1.20
 description VLAN 20. fa0/13-22 SW1
@@ -35,7 +34,6 @@ no ip redirects
 no ip unreachables
 no ip proxy-arp
 ip verify source
-
 !
 interface Gi 0/1.30
 description VLAN 30. fa0/1-12 SW2
@@ -53,7 +51,6 @@ no ip redirects
 no ip unreachables
 no ip proxy-arp
 ip verify source
-
 !
 interface Gi 0/1.40
 description VLAN 40. INTERN-WIFI
@@ -71,7 +68,6 @@ no ip redirects
 no ip unreachables
 no ip proxy-arp
 ip verify source
-
 !
 interface Gi 0/1.50
 description VLAN 50. EKSTERN-WIFI
@@ -89,7 +85,6 @@ no ip redirects
 no ip unreachables
 no ip proxy-arp
 ip verify source
-
 !
 interface fa 0/1/0
 description GRE. /28
@@ -105,10 +100,6 @@ interface tunnel 0
 ip address 172.16.1.1 255.255.255.0
 tunnel source 10.10.10.2
 tunnel destination 20.20.20.2
-
-
-
-
 !
 interface gi 0/0
 description ISP (Skolen)
@@ -165,7 +156,6 @@ network 10.10.10.0 0.0.0.15 area 0
 network 172.16.1.0 0.0.0.127 area 0
 ! Der mangler nok nogen networks
 ip route 10.10.10.0 255.255.255.240 172.16.1.1
-
 !
 ip nat inside source list 1 interface Gi 0/0 overload
 access-list 1 permit 172.16.0.0 0.15.255.255
@@ -201,28 +191,18 @@ aaa authentication login default group Cisco local
 aaa authorization console
 aaa authorization exec default group Cisco local if-authenticated
 !
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 5
+ lifetime 3600
 
 !
-
-
-
-
-
-
-
-
-
-int gi 0/0
-ip add 10.10.10.6 255.255.255.240
-no shutdown
-
-
-int g10/1
-ip add 20.20.20.5 255.255.255.240
-no shutdown
+crypto isakmp key Admin address 10.10.10.1
+crypto ipsec transform-set SIKKER esp-aes 256 esp-sha-hmac
+crypto map MYMAP 10 ipsec-isakmp
+ set peer 10.10.10.1
+ set transform-set SIKKER  
+ match address 100
 !
-router ospf 1
-network 10.10.10.0 0.0.0.15 area 0
-network 20.20.20.0 0.0.0.15 area 0
-!
-
+access-list 100 permit gre any any
